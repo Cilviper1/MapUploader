@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../Morthia_Website"
+		}
+	],
+	"settings": {
+		"files.readonlyInclude": {
+			"{**/.c4z/.extsrcs/*.PROTSYM.cbl,**/.c4z/.extsrcs/*.PROTSYM.listing}": true
+		},
+		"liveServer.settings.multiRootWorkspaceName": "MapUploader"
+	}
+}
