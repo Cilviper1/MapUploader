@@ -37,7 +37,7 @@
       responseElement.textContent = 'Sending request...';
 
       try {
-        const response = await fetch('/API/populate-users', {
+        const response = await fetch('/API/populate-users/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -55,3 +55,5 @@
 </body>
 
 </html>
+<!-- This HTML file is a simple frontend to test the populate users API endpoint.
+     It includes a button to trigger the request and displays the server's response. -->

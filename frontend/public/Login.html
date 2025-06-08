@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
-
 <head>
     <meta charset="UTF-8" />
     <title>Login Page</title>
@@ -13,54 +11,181 @@
             max-width: 400px;
             margin: auto;
             padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1.5rem;
         }
 
         input,
         button {
             display: block;
-            margin: 0.5rem 0;
-            padding: 0.5rem;
+            margin: 0.8rem 0;
+            padding: 0.8rem;
             width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
         }
 
-        .message {
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .primary-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .primary-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .secondary-btn {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .secondary-btn:hover {
+            background: #e9ecef;
+        }
+
+        .test-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .test-btn:hover {
+            background: #218838;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
             margin-top: 1rem;
-            color: green;
         }
 
-        .error {
-            color: red;
+        .button-group button {
+            flex: 1;
+            margin: 0;
+        }
+
+        .loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
         }
     </style>
 </head>
 
 <body>
+
+
     <div class="container">
-        <h2>Login</h2>
+        <h2>Welcome Back</h2>
         <form id="loginForm">
+            <div class="form-group">
+                <label for="loginUser">Username:</label>
+                <input type="text" id="loginUser" placeholder="Enter your username" required />
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required />
+            </div>
 
-            <label for="loginUsername">Username:</label>
-            <input type="text" id="loginUser" placeholder="Enter your username" required />
+            <button type="submit" class="primary-btn" id="loginBtn">Login</button>
 
-            <label for="loginPassword">Password:</label>
-            <input type="password" id="loginPassword" placeholder="Enter your password" required />
+            <div class="button-group">
+                <button type="button" class="test-btn" onclick="testLogin()">Quick Test</button>
+                <button type="button" class="secondary-btn" onclick="signUp()">Sign Up</button>
+            </div>
 
-            <button type="button" onclick="login()">Login</button>
-            <button type="button" onclick="testLogin()">Test Login</button>
-            <button type="button" onclick="signUp()">Sign Up</button>
-            <button type="button" onclick="listAllUsers()">List Users</button>
-            <button type="button" onclick="generateRandomUsers()">Make Users</button>
-
+            <div class="button-group" style="margin-top: 1rem;">
+                <button type="button" class="secondary-btn" onclick="listAllUsers()">List Users</button>
+                <button type="button" class="secondary-btn" onclick="generateRandomUsers()">Make Users</button>
+            </div>
         </form>
     </div>
+    
 
-    <script src="../../backend/API/LoginHandler.js"></script>
+    <!-- Include our new auth.js -->
+    <script src="auth.js"></script>
 
     <script>
+        // Handle form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            const loginBtn = document.getElementById('loginBtn');
+            const originalText = loginBtn.textContent;
+
+            // Show loading state
+            loginBtn.textContent = 'Logging in...';
+            loginBtn.classList.add('loading');
+            loginBtn.disabled = true;
+
+            try {
+                await login(); // Call our API function
+            } finally {
+                // Reset button state
+                loginBtn.textContent = originalText;
+                loginBtn.classList.remove('loading');
+                loginBtn.disabled = false;
+            }
+        });
+
         function signUp() {
             window.location.href = "Register.html";
         }
+
+        // Auto-focus username field
+        document.getElementById('loginUser').focus();
+
+        // Handle Enter key in password field
+        document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
     </script>
+
 
 </body>
 
