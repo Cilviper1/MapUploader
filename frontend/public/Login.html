@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Login Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 400px;
+            margin: auto;
+            padding: 2rem;
+        }
+
+        input,
+        button {
+            display: block;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            width: 100%;
+        }
+
+        .message {
+            margin-top: 1rem;
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUser" placeholder="Enter your username" required />
+
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" placeholder="Enter your password" required />
+
+            <button type="button" onclick="login()">Login</button>
+            <button type="button" onclick="testLogin()">Test Login</button>
+            <button type="button" onclick="signUp()">Sign Up</button>
+            <button type="button" onclick="listAllUsers()">List Users</button>
+            <button type="button" onclick="generateRandomUsers()">Make Users</button>
+
+        </form>
+    </div>
+
+    <script src="../../backend/API/LoginHandler.js"></script>
+
+    <script>
+        function signUp() {
+            window.location.href = "Register.html";
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="../backend/API/LoginHandler.js"></script>
+
+
+<!--
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (loggedInUser) {
+      //window.location.href = "user.html";
+    }
+  });
+</script>
+-->
+
+
+<head>
+  <meta charset="UTF-8">
+  <title>User Registration</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: auto;
+      padding: 2rem;
+    }
+
+    input,
+    button {
+      display: block;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      width: 100%;
+    }
+
+    .message {
+      margin-top: 1rem;
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+
+
+
+<body>
+
+  <h2>Register</h2>
+
+
+  <form id="registerForm">
+
+    <input type="text" name="username" placeholder="Username" required />
+    <input type="password" name="password" placeholder="Password" required />
+
+
+    <button type="submit" onclick="registerUser(username,password)"> Register </button>
+
+    <script>
+      function registerUser(username, password) {
+        if (username && password) {
+          // Call the register function from LoginHandler.js
+          register(username, password);
+        } else {
+          consol.log("Please fill in both fields.");
+        }
+      }
+    </script>
+
+    <button type="button" onclick="redirectToLogin()"> Back to Login </button>
+    <script>
+      function redirectToLogin() {
+        window.location.href = "Login.html";
+      }
+
+    </script>
+
+  </form>
+</body>

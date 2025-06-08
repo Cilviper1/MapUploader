@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Populate Users</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    #response {
+      margin-top: 1rem;
+      background: #f9f9f9;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Populate users</h1>
+  <button id="populateBtn">Populate Users</button>
+  <pre id="response">Click the button to send data to the server...</pre>
+
+  <script>
+    document.getElementById('populateBtn').addEventListener('click', async () => {
+      const responseElement = document.getElementById('response');
+      responseElement.textContent = 'Sending request...';
+
+      try {
+        const response = await fetch('/API/populate-users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ count: 100 }) // optional, can leave empty if not used
+        });
+
+        const text = await response.text(); // expecting plain text: "Hello world"
+        responseElement.textContent = `Response from server:\n${text}`;
+      } catch (error) {
+        responseElement.textContent = `Error: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+
+</html>

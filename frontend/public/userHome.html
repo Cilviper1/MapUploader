@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../../style.css">
+
+
+
+
+
+    <script src="backend/API/LoginHandler.js"></script>
+    <script src="backend/API/upload.js"></script>
+    <script>
+        // Function to check if the user is logged in
+        function checkIfLoggedIn() {
+            const loggedInUser = localStorage.getItem("loggedInUser");
+
+            // If user is not logged in, redirect to login page
+            if (!loggedInUser) {
+                window.location.href = "login.html";
+            }
+            return JSON.parse(loggedInUser);
+        }
+    </script>
+</head>
+
+<body>
+    <button onclick="logout()">Logout</button>
+    <script>
+
+        function logout() {
+            localStorage.removeItem("loggedInUser");
+            window.location.href = "login.html";
+        }
+
+    </script>
+
+
+    <div>
+        <h1>Welcome, <span id="loggedInUser"></span></h1>
+        <script>
+            // Display the username of the currently logged in user
+            const currentUser = checkIfLoggedIn();
+            if (currentUser && currentUser.nickName && currentUser.NickName !== null) {
+                document.getElementById("loggedInUser").textContent = currentUser.nickName;
+            } else {
+                document.getElementById("loggedInUser").textContent = currentUser.username;
+            }
+        </script>
+        <input type="text" id="newName" placeholder="Enter a new nickname">
+        <button onclick="changeNickName(document.getElementById('newName').value)">Update Nickname</button>
+        <button onclick="deleteNickName(document.getElementById('newName').value)">Clear Nickname</button>
+
+        <h1 id="welcomeMessage"></h1>
+        <form id="imageUploadForm">
+            <label for="imageInput">Upload an image:</label>
+            <input type="file" id="imageInput" accept="image/*" title="Select an image to upload">
+            <button type="button" onclick="uploadImage();nowRender()">Upload Image</button>
+            <button type="button" onclick="nowRender()">Render Image</button>
+        </form>
+        <div id="uploadedImageContainer">
+            <h2>Uploaded Image:
+                <button type="button" onclick="setProfilePicture()">Set as Profile Picture</button>
+            </h2>
+            <button type="button" onclick="listAllUsers()">Test</button>
+            <h2></h2>
+
+
+            <img id="uploadedImage" class="uploaded-image" src="" alt="No image uploaded yet">
+        </div>
+    </div>
+
+
+
+    <main class="wrapper-home">
+        <!-- Map element -->
+        <div class="container">
+            <div id="map"></div>
+        </div>
+        <!-- Side Panel -->
+        <!-- <div class="sidebar-container">
+            <h4 class="close-btn">✕</h4>
+            <div class="sidebar-content">
+                <p class="placeholder">
+                    <em>Click a place on the map to begin exploring Morthia!</em>
+                </p>
+            </div>\
+        -->
+        </div>
+    </main>
+    <script src="../src/renderMap.js"></script>
+    <script>
+        function nowRender() {
+            const MAP_HEIGHT = 500
+            const MAP_WIDTH = 500
+            renderMap('../../backend/images/Morthia-Web-Official.jpg', MAP_HEIGHT, MAP_WIDTH)
+        }
+    </script>
+
+
+
+    <script>
+        // Check if the user has a profile picture and display it
+        const user = checkIfLoggedIn();
+        const uploadedImage = document.getElementById("uploadedImage");
+        const imageUploadForm = document.getElementById("imageUploadForm");
+
+        if (user && user.profilePic) {
+            uploadedImage.src = user.profilePic;
+            imageUploadForm.style.display = "none"; // Hide the upload form if profile picture exists
+        }
+
+        //
+        window.onload = function () {
+            // Function to handle image upload and display
+            // Call the function to enable resizing
+            enableImageResizing();
+
+            // Display the current nickname when the page loads
+            displayNickname();
+        };
+    </script>
+    <script src="../../backend/API/LoginHandler.js"></script>
+    <script src="../../backend/API/upload.js"></script>
+    <script src="../src/renderMap.js"></script>
+
+
+</body>
+
+
+
+</html>
