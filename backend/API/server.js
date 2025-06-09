@@ -96,21 +96,28 @@ app.post('/api/register', (req, res) => {
 });
 
 // Login endpoint
-app.post('/api/login', (req, res) => {
+app.post("/login", (req, res) => {
     const { username, password } = req.body;
 
-    const user = users.find(u => u.username === username && u.password === password);
-
-    if (user) {
-        // Don't send password back to client
-        const { password: _, ...userWithoutPassword } = user;
-        res.json({
-            message: "Login successful",
-            user: userWithoutPassword
-        });
-    } else {
-        res.status(401).json({ error: "Invalid username or password" });
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password required." });
     }
+
+    const query = `SELECT * FROM users WHERE username = ? AND password = ?`;
+    db.get(query, [username, password], (err, user) => {
+        if (err) {
+            console.error("Login error:", err.message);
+            return res.status(500).json({ message: "Internal server error." });
+        }
+
+        if (!user) {
+            return res.status(401).json({ message: "Invalid username or password." });
+        }
+
+        // Optionally remove sensitive data before sending back
+        delete user.password;
+        res.json({ user });
+    });
 });
 
 // Get current user profile
@@ -150,6 +157,45 @@ app.get('/api/users', (req, res) => {
     const usersWithoutPasswords = users.map(({ password, ...user }) => user);
     res.json(usersWithoutPasswords);
 });
+
+// Serve static files from the frontend
+app.get("/users", (req, res) => {
+    db.all("SELECT * FROM users", [], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        res.json(rows);
+    });
+});
+
+
+// Create a new user
+app.post("/users", (req, res) => {
+    const { username, password, email, nickName, phoneNumber, profilePic, imageUploaded } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required." });
+    }
+
+    const query = `
+        INSERT INTO users (username, password, email, nickName, phoneNumber, profilePic, imageUploaded)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const params = [username, password, email, nickName, phoneNumber, profilePic, imageUploaded];
+
+    db.run(query, params, function (err) {
+        if (err) {
+            console.error("Error inserting user:", err.message);
+            return res.status(500).json({ message: "Failed to save user." });
+        }
+
+        // Return the new user ID
+        res.status(201).json({ message: "User created successfully", userId: this.lastID });
+    });
+});
+
 
 // Test endpoint (keep for now)
 app.post('/API/populate-users', (req, res) => {

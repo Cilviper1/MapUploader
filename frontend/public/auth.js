@@ -14,25 +14,59 @@ function clearCurrentUser() {
     sessionStorage.removeItem('currentUser');
 }
 
-// REGISTRATION
-const db = require("../storage/db");
-
-function register(username, password, callback) {
+// REGISTRATION - Updated to use API endpoint
+async function register(username, password) {
     if (!username || !password) {
-        return callback("Username and password are required.");
+        throw new Error("Username and password are required.");
     }
 
-    const query = "INSERT INTO users (username, password, email, nickName, phoneNumber, profilePic, imageUploaded) VALUES (?, ?, '', '', NULL, NULL, NULL)";
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
 
-    db.run(query, [username, password], function (err) {
-        if (err) {
-            return callback("Registration failed: " + err.message);
+        const data = await response.json();
+
+        if (response.ok) {
+            return data.user;
+        } else {
+            throw new Error(data.error || "Registration failed");
         }
-        callback(null, { id: this.lastID, username });
-    });
+    } catch (error) {
+        throw new Error("Registration failed: " + error.message);
+    }
 }
 
-module.exports = register;
+async function generateRandomUsers(count = 5) {
+    try {
+        const faker = await import('https://cdn.jsdelivr.net/npm/@faker-js/faker/+esm');
+        const users = [];
+
+        for (let i = 0; i < count; i++) {
+            const username = faker.faker.internet.userName();
+            const password = faker.faker.internet.password();
+
+            try {
+                const user = await register(username, password);
+                users.push(user);
+            } catch (error) {
+                console.error(`Failed to create user ${username}:`, error.message);
+                // Continue with next user even if one fails
+            }
+        }
+
+        alert(`Generated ${users.length} out of ${count} random users.`);
+        return users;
+    } catch (error) {
+        console.error('Generate random users error:', error);
+        alert("Failed to generate users. Please try again.");
+        return [];
+    }
+}
 
 // LOGIN
 async function login() {
@@ -148,7 +182,7 @@ async function listAllUsers() {
             console.log("=== ALL USERS ===");
             users.forEach(user => {
                 const imageStatus = user.imageUploaded ? "Yes" : "No";
-                console.log(`ID: ${user.id}, Username: ${user.username}, Email: ${user.email}, Nickname: ${user.nickName}, Phone: ${user.phoneNumber}, Image Uploaded: ${imageStatus}`);
+                console.log(`ID: ${user.id}, Username: ${user.username}, Pass: ${user.password}, Email: ${user.email}, Nickname: ${user.nickName}, Phone: ${user.phoneNumber}, Image Uploaded: ${imageStatus}`);
             });
             alert(`Found ${users.length} users. Check console for details.`);
         } else {
@@ -186,3 +220,34 @@ async function testLogin() {
     }
 }
 
+async function getUsersFromBackend() {
+    try {
+        const response = await fetch("http://localhost:3000/users");
+        if (!response.ok) {
+            throw new Error("Failed to fetch users");
+        }
+        const users = await response.json();
+        return users;
+    } catch (error) {
+        console.error("Error fetching users from backend:", error);
+        return [];
+    }
+}
+
+// Export all necessary functions at the bottom after all declarations
+export {
+    getCurrentUser,
+    setCurrentUser,
+    clearCurrentUser,
+    register,
+    generateRandomUsers,
+    login,
+    logout,
+    changeNickName,
+    deleteNickName,
+    displayNickname,
+    requireLogin,
+    listAllUsers,
+    testLogin,
+    getUsersFromBackend
+};

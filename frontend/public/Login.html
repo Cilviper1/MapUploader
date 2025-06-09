@@ -116,8 +116,6 @@
 </head>
 
 <body>
-
-
     <div class="container">
         <h2>Welcome Back</h2>
         <form id="loginForm">
@@ -143,12 +141,22 @@
             </div>
         </form>
     </div>
-    
 
-    <!-- Include our new auth.js -->
-    <script src="auth.js"></script>
+    <!-- Import auth functions as a module -->
+    <script type="module">
+        import {
+            login,
+            testLogin,
+            listAllUsers,
+            generateRandomUsers
+        } from './auth.js';
 
-    <script>
+        // Make functions globally accessible for onclick handlers
+        window.login = login;
+        window.testLogin = testLogin;
+        window.listAllUsers = listAllUsers;
+        window.generateRandomUsers = generateRandomUsers;
+
         // Handle form submission
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault(); // Prevent default form submission
@@ -175,6 +183,9 @@
             window.location.href = "Register.html";
         }
 
+        // Make signUp globally accessible
+        window.signUp = signUp;
+
         // Auto-focus username field
         document.getElementById('loginUser').focus();
 
@@ -185,8 +196,6 @@
             }
         });
     </script>
-
-
 </body>
 
 </html>
