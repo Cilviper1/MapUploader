@@ -11,7 +11,7 @@
             max-width: 400px;
             margin: auto;
             padding: 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #546ddd 0%, #c2a730 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -41,6 +41,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 1rem;
+            box-sizing: border-box;
         }
 
         input:focus {
@@ -58,7 +59,7 @@
             transition: background 0.3s ease;
         }
 
-        .primary-btn:hover {
+        .primary-btn:hover:not(:disabled) {
             background: #5a6fd8;
         }
 
@@ -70,7 +71,7 @@
             transition: all 0.3s ease;
         }
 
-        .secondary-btn:hover {
+        .secondary-btn:hover:not(:disabled) {
             background: #e9ecef;
         }
 
@@ -82,7 +83,7 @@
             transition: background 0.3s ease;
         }
 
-        .test-btn:hover {
+        .test-btn:hover:not(:disabled) {
             background: #218838;
         }
 
@@ -112,88 +113,247 @@
             color: #555;
             font-weight: 500;
         }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: auto;
+            margin: 0;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <h2>Welcome Back</h2>
-        <form id="loginForm">
+        <form id="loginForm" role="form" aria-label="Login Form">
             <div class="form-group">
                 <label for="loginUser">Username:</label>
-                <input type="text" id="loginUser" placeholder="Enter your username" required />
+                <input type="text" id="loginUser" name="username" placeholder="Enter your username" required 
+                       aria-describedby="username-error" autocomplete="username" />
             </div>
+            
             <div class="form-group">
                 <label for="loginPassword">Password:</label>
-                <input type="password" id="loginPassword" placeholder="Enter your password" required />
+                <div class="password-toggle">
+                    <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required 
+                           aria-describedby="password-error" autocomplete="current-password" />
+                    <button type="button" id="togglePassword" aria-label="Toggle password visibility">👁️</button>
+                </div>
             </div>
 
-            <button type="submit" class="primary-btn" id="loginBtn">Login</button>
+            <div id="error-container" class="error-message" role="alert" aria-live="polite"></div>
+
+            <button type="submit" class="primary-btn" id="loginBtn" aria-describedby="login-status">
+                Login
+            </button>
 
             <div class="button-group">
-                <button type="button" class="test-btn" onclick="testLogin()">Quick Test</button>
-                <button type="button" class="secondary-btn" onclick="signUp()">Sign Up</button>
+                <button type="button" class="test-btn" id="testBtn">Quick Test</button>
+                <button type="button" class="secondary-btn" id="signupBtn">Sign Up</button>
             </div>
 
             <div class="button-group" style="margin-top: 1rem;">
-                <button type="button" class="secondary-btn" onclick="listAllUsers()">List Users</button>
-                <button type="button" class="secondary-btn" onclick="generateRandomUsers()">Make Users</button>
+                <button type="button" class="secondary-btn" id="listBtn">List Users</button>
+                <button type="button" class="secondary-btn" id="generateBtn">Make Users</button>
             </div>
         </form>
     </div>
 
-    <!-- Import auth functions as a module -->
-    <script type="module">
-        import {
-            login,
-            testLogin,
-            listAllUsers,
-            generateRandomUsers
-        } from './auth.js';
+    <script>
+        // State management
+        const state = {
+            isLoading: false
+        };
 
-        // Make functions globally accessible for onclick handlers
-        window.login = login;
-        window.testLogin = testLogin;
-        window.listAllUsers = listAllUsers;
-        window.generateRandomUsers = generateRandomUsers;
+        // Mock auth functions (replace with your actual auth.js imports)
+        const auth = {
+            login: async (username, password) => {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (username === 'admin' && password === 'password') {
+                    return { success: true, message: 'Login successful!' };
+                }
+                throw new Error('Invalid username or password');
+            },
+            signUp: () => {
+                window.location.href = "Register.html";
+            },
+            testLogin: async () => {
+                return auth.login('admin', 'password');
+            },
+            listUsers: () => {
+                console.log('Listing users...');
+                alert('Users listed in console');
+            },
+            generateRandomUsers: () => {
+                console.log('Generating random users...');
+                alert('Random users generated');
+            }
+        };
 
-        // Handle form submission
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent default form submission
+        // Utility functions
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.textContent = message;
+            errorContainer.style.display = 'block';
+        }
 
+        function hideError() {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.style.display = 'none';
+        }
+
+        function setLoadingState(isLoading) {
+            state.isLoading = isLoading;
             const loginBtn = document.getElementById('loginBtn');
-            const originalText = loginBtn.textContent;
-
-            // Show loading state
-            loginBtn.textContent = 'Logging in...';
-            loginBtn.classList.add('loading');
-            loginBtn.disabled = true;
-
-            try {
-                await login(); // Call our API function
-            } finally {
-                // Reset button state
-                loginBtn.textContent = originalText;
+            
+            if (isLoading) {
+                loginBtn.textContent = 'Logging in...';
+                loginBtn.classList.add('loading');
+                loginBtn.disabled = true;
+            } else {
+                loginBtn.textContent = 'Login';
                 loginBtn.classList.remove('loading');
                 loginBtn.disabled = false;
             }
-        });
-
-        function signUp() {
-            window.location.href = "Register.html";
         }
 
-        // Make signUp globally accessible
-        window.signUp = signUp;
-
-        // Auto-focus username field
-        document.getElementById('loginUser').focus();
-
-        // Handle Enter key in password field
-        document.getElementById('loginPassword').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        function validateForm() {
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username) {
+                showError('Please enter your username');
+                return false;
             }
+            
+            if (!password) {
+                showError('Please enter your password');
+                return false;
+            }
+            
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters long');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Event handlers
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            if (state.isLoading) return;
+            
+            hideError();
+            
+            if (!validateForm()) return;
+            
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            setLoadingState(true);
+            
+            try {
+                const result = await auth.login(username, password);
+                console.log('Login successful:', result);
+                // Redirect or handle success
+                alert('Login successful!');
+            } catch (error) {
+                showError(error.message || 'Login failed. Please try again.');
+                console.error('Login error:', error);
+            } finally {
+                setLoadingState(false);
+            }
+        }
+
+        async function handleTestLogin() {
+            if (state.isLoading) return;
+            
+            hideError();
+            setLoadingState(true);
+            
+            try {
+                const result = await auth.testLogin();
+                console.log('Test login successful:', result);
+                alert('Test login successful!');
+            } catch (error) {
+                showError(error.message || 'Test login failed');
+                console.error('Test login error:', error);
+            } finally {
+                setLoadingState(false);
+            }
+        }
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('loginPassword');
+            const toggleBtn = document.getElementById('togglePassword');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+                toggleBtn.setAttribute('aria-label', 'Hide password');
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
+                toggleBtn.setAttribute('aria-label', 'Show password');
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Form submission
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            
+            // Button clicks
+            document.getElementById('testBtn').addEventListener('click', handleTestLogin);
+            document.getElementById('signupBtn').addEventListener('click', auth.signUp);
+            document.getElementById('listBtn').addEventListener('click', auth.listUsers);
+            document.getElementById('generateBtn').addEventListener('click', auth.generateRandomUsers);
+            document.getElementById('togglePassword').addEventListener('click', togglePasswordVisibility);
+            
+            // Auto-focus username field
+            document.getElementById('loginUser').focus();
+            
+            // Clear error on input
+            document.getElementById('loginUser').addEventListener('input', hideError);
+            document.getElementById('loginPassword').addEventListener('input', hideError);
         });
     </script>
 </body>

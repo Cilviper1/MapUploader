@@ -1,7 +1,7 @@
 import express from 'express';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { existsSync } from 'fs';
+// import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,6 +16,10 @@ app.use(express.static(join(__dirname, '../../frontend/public')));
 let users = [];
 let nextUserId = 1;
 
+
+
+// Initialize users on startup
+initializeMockUsers();
 // Initialize with mock data
 function initializeMockUsers() {
     const firstNames = ["Alex", "Taylor", "Jordan", "Morgan", "Casey", "Jamie", "Riley", "Avery", "Charlie", "Skyler"];
@@ -28,11 +32,12 @@ function initializeMockUsers() {
         username: "1",
         password: "1",
         email: "1@test.test",
-        nickName: "",
+        nickName: "Test User",
         phoneNumber: null,
         profilePic: null,
         imageUploaded: null
     });
+
 
     // Add random users
     for (let i = 2; i <= 20; i++) {
@@ -56,10 +61,10 @@ function initializeMockUsers() {
     console.log("Mock users initialized");
 }
 
-// Initialize users on startup
-initializeMockUsers();
+
 
 // AUTH ROUTES
+
 
 // Register endpoint
 app.post('/api/register', (req, res) => {
@@ -95,6 +100,8 @@ app.post('/api/register', (req, res) => {
     });
 });
 
+
+
 // Login endpoint
 app.post("/login", (req, res) => {
     const { username, password } = req.body;
@@ -120,7 +127,22 @@ app.post("/login", (req, res) => {
     });
 });
 
+
+
 // Get current user profile
+const userId = parseInt(req.params.id);
+const user = users.find(u => u.id === userId);
+
+if (user) {
+    const { password: _, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
+} else {
+    res.status(404).json({ error: "User not found" });
+}
+
+
+
+// Get user profile by ID
 app.get('/api/user/:id', (req, res) => {
     const userId = parseInt(req.params.id);
     const user = users.find(u => u.id === userId);
@@ -132,6 +154,8 @@ app.get('/api/user/:id', (req, res) => {
         res.status(404).json({ error: "User not found" });
     }
 });
+
+
 
 // Update nickname
 app.put('/api/user/:id/nickname', (req, res) => {
@@ -152,6 +176,8 @@ app.put('/api/user/:id/nickname', (req, res) => {
     });
 });
 
+
+
 // List all users (for debugging)
 app.get('/api/users', (req, res) => {
     const usersWithoutPasswords = users.map(({ password, ...user }) => user);
@@ -168,6 +194,7 @@ app.get("/users", (req, res) => {
         res.json(rows);
     });
 });
+
 
 
 // Create a new user
@@ -197,11 +224,14 @@ app.post("/users", (req, res) => {
 });
 
 
+
 // Test endpoint (keep for now)
 app.post('/API/populate-users', (req, res) => {
     console.log('POST /API/populate-users hit');
     res.send('Hello world');
 });
+
+
 
 // Debug middleware
 app.use((req, res, next) => {
@@ -209,8 +239,32 @@ app.use((req, res, next) => {
     next();
 });
 
+
+
+// Serve the frontend index.html
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 }).on('error', (err) => {
     console.error('Server error:', err);
+});
+
+
+
+// Your server should handle these routes:
+app.put('/users/:id', (req, res) => {
+    // Update user by ID
+});
+
+
+
+// Delete nickname
+app.post('/users/generate-mock', (req, res) => {
+    // Generate mock users
+});
+
+
+
+// Logout endpoint (optional, can be used to clear session)
+app.post('/logout', (req, res) => {
+    // Optional: Handle logout logic
 });
